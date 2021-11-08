@@ -31,6 +31,7 @@ public class Square {
 				} else {
 					moveDirection = Direction.LEFT;
 				}
+				System.out.println("square(): " + ((e.getX() > (x + size / 2)) ? "right" : "left"));
 			}
 		}));
 		position = new Point2D(x, y);
@@ -50,6 +51,11 @@ public class Square {
 		return color.getColor();
 	}
 
+	public void setColor(Colors color) {
+		this.color = color;
+		rectangle.setFill(getColor());
+	}
+
 	public double getX() {
 		return position.getX();
 	}
@@ -58,8 +64,20 @@ public class Square {
 		return position.getY();
 	}
 
+	public int getCol() {
+		return (int) (position.getX() / rectangle.getWidth());
+	}
+
+	public int getRow() {
+		return (int) (position.getY() / rectangle.getHeight());
+	}
+
 	public Direction getMoveDirection() {
 		return moveDirection;
+	}
+
+	public void setNoMove() {
+		moveDirection = Direction.NOMOVE;
 	}
 
 	public void reset() {

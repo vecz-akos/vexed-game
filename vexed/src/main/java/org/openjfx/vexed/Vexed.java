@@ -1,5 +1,6 @@
 package org.openjfx.vexed;
 
+import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -14,6 +15,7 @@ public class Vexed {
 	private GraphicsContext gc;
 	Stage stage;
 	Canvas canvas;
+	AnimationTimer timer;
 
 	GameBoard gameBoard;
 	int currentLevel;
@@ -35,6 +37,14 @@ public class Vexed {
 		nextLevel();
 
 		stage.show();
+
+		timer = new AnimationTimer() {
+			public void handle(long now) {
+				gameBoard.update();
+			}
+		};
+
+		timer.start();
 	}
 
 	public void nextLevel() {

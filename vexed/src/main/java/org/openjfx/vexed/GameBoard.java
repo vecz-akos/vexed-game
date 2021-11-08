@@ -30,6 +30,97 @@ public class GameBoard {
 		readLevelFile();
 	}
 
+	public void update() {
+		moveSquares();
+	}
+
+	public Square getSquare(int col, int row) {
+		return board[row][col];
+	}
+
+	public Square getSquare(Point2D place) {
+		return board[(int) place.getY()][(int) place.getX()];
+	}
+
+	public void loadLevel(int levelNum) {
+		for (int row = 0; row < rowNum; row++) {
+			for (int col = 0; col < colNum; col++) {
+				board[row][col] = new Square(col * squareSize, row * squareSize, squareSize,
+						levelsData[levelNum][row][col]);
+				root.getChildren().add(board[row][col].getRectengle());
+			}
+		}
+	}
+
+	public void moveSquares() {
+		for (int row = 0; row < rowNum; row++) {
+			for (int col = 0; col < colNum; col++) {
+				Square square = getSquare(col, row);
+				moveSquare(square);
+			}
+		}
+	}
+
+	private boolean moveSquare(Square square) {
+		Direction moveDirection = square.getMoveDirection();
+		if (moveDirection == Direction.NOMOVE)
+			return true;
+
+		Point2D aimPlace = new Point2D(square.getCol() + moveDirection.getX(), square.getRow() + moveDirection.getY());
+		if (!isValidPlace(aimPlace) || !square.isMoveable()) {
+			square.setNoMove();
+			return false;
+		}
+
+		Square aimSquare = getSquare(aimPlace);
+		if (aimSquare.color != Colors.WHITE) {
+			square.setNoMove();
+			return false;
+		}
+
+		aimSquare.setColor(square.color);
+		square.reset();
+
+		return true;
+	}
+
+	private void gravity() {
+		// TODO !!!
+	}
+
+	private boolean isSquareCanFall(Square square) {
+		if (!square.isMoveable())
+			return false;
+		Point2D belowPlace = new Point2D(square.getX() + gravityDirection.getX(),
+				square.getY() + gravityDirection.getY());
+		if (!isValidPlace(belowPlace)) {
+			return false;
+		}
+		Square belowSquare = getSquare(belowPlace);
+		if (belowSquare.color != Colors.WHITE || belowSquare.moveDirection != gravityDirection)
+			return false;
+		return true;
+
+	}
+
+	public boolean isValidPlace(Point2D place) {
+		if ((int) place.getX() > colNum || (int) place.getY() > rowNum || (int) place.getX() < 0
+				|| (int) place.getY() < 0)
+			return false;
+		return true;
+	}
+
+	private int countMoveableSquares() {
+		int counter = 0;
+		for (int row = 0; row < rowNum; row++) {
+			for (int col = 0; col < colNum; col++) {
+				if (board[row][col].isMoveable())
+					++counter;
+			}
+		}
+		return counter;
+	}
+
 	private void readLevelFile() {
 		try {
 			String pathToLevelsFile = new File("src\\main\\java\\org\\openjfx\\vexed\\leveldata_test.txt")
@@ -75,67 +166,5 @@ public class GameBoard {
 		} catch (Exception e) {
 			System.out.println("Exception: " + e.getMessage());
 		}
-	}
-
-	public Square getSquare(int col, int row) {
-		return board[row][col];
-	}
-
-	public Square getSquare(Point2D place) {
-		return board[(int) place.getY()][(int) place.getX()];
-	}
-
-	public void loadLevel(int levelNum) {
-		for (int row = 0; row < rowNum; row++) {
-			for (int col = 0; col < colNum; col++) {
-				board[row][col] = new Square(col * squareSize, row * squareSize, squareSize,
-						levelsData[levelNum][row][col]);
-				root.getChildren().add(board[row][col].getRectengle());
-			}
-		}
-	}
-
-	public void moveSquares() {
-		for (int row = 0; row < rowNum; row++) {
-			for (int col = 0; col < colNum; col++) {
-				Square square = getSquare(col, row);
-				if (square.getMoveDirection() != Direction.NOMOVE)
-					moveSquare(square);
-			}
-		}
-	}
-
-	private boolean moveSquare(Square square) {
-		Direction moveDirection = square.getMoveDirection();
-		if (moveDirection == Direction.NOMOVE)
-			return true;
-
-		Point2D aimPlace = new Point2D(square.getX() + moveDirection.getX(), square.getY() + moveDirection.getY());
-
-		if (!isValidPlace(aimPlace) || getSquare(aimPlace).color != Colors.WHITE || !square.isMoveable())
-			return false;
-
-		getSquare(aimPlace).color = square.color;
-		square.reset();
-
-		return true;
-	}
-
-	private int countMoveableSquares() {
-		int counter = 0;
-		for (int row = 0; row < rowNum; row++) {
-			for (int col = 0; col < colNum; col++) {
-				if (board[row][col].isMoveable())
-					++counter;
-			}
-		}
-		return counter;
-	}
-
-	public boolean isValidPlace(Point2D place) {
-		if ((int) place.getX() > colNum || (int) place.getY() > rowNum || (int) place.getX() < 0
-				|| (int) place.getY() < 0)
-			return false;
-		return true;
 	}
 }

@@ -8,26 +8,31 @@ public enum Direction {
 
 	private int directionCode;
 	private String name;
-	private Point2D vector;
+	private int x, y;
 
 	Direction(int directionCode, String name) {
 		this.directionCode = directionCode;
 		this.name = name;
 		switch (this.directionCode) {
 		case 0:
-			vector = new Point2D(0, 0);
+			x = 0;
+			y = 0;
 			break;
 		case 1:
-			vector = new Point2D(0, -1);
+			x = 0;
+			y = -1;
 			break;
 		case 2:
-			vector = new Point2D(1, 0);
+			x = 1;
+			y = 0;
 			break;
 		case 3:
-			vector = new Point2D(0, 1);
+			x = 0;
+			y = 1;
 			break;
 		case 4:
-			vector = new Point2D(-1, 0);
+			x = -1;
+			y = 0;
 			break;
 		default:
 			break;
@@ -38,15 +43,11 @@ public enum Direction {
 		return directionCode;
 	}
 
-	public Point2D getVector() {
-		return vector;
+	public int getX() {
+		return x;
 	}
 
-	public double getX() {
-		return vector.getX();
-	}
-
-	public double getY() {
-		return vector.getY();
+	public int getY() {
+		return y;
 	}
 }
