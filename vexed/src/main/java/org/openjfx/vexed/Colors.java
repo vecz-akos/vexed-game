@@ -12,25 +12,6 @@ public enum Colors {
 	Colors(int colorCode, String rgb) {
 		this.colorCode = colorCode;
 		this.rgb = rgb;
-		// switch (colorCode) {
-		// case 9:
-		// this.rgb = Color.BLACK;
-		// break;
-		// case 0:
-		// this.rgb = Color.WHITE;
-		// break;
-		// case 1:
-		// this.rgb = Color.RED;
-		// break;
-		// case 2:
-		// this.rgb = Color.YELLOW;
-		// break;
-		// case 3:
-		// this.rgb = Color.GREEN;
-		// break;
-		// default:
-		// this.rgb = Color.WHITE;
-		// }
 	}
 
 	public static Colors getColor(int colorCode) {

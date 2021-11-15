@@ -1,18 +1,16 @@
 package org.openjfx.vexed;
 
-import javafx.geometry.Point2D;
-
 public enum Direction {
 
-	UP(1, "up"), LEFT(4, "left"), NOMOVE(0, "nomove"), RIGHT(2, "right"), DOWN(3, "down");
+	         UP(1),
+	LEFT(4), NOMOVE(0), RIGHT(2),
+	         DOWN(3);
 
 	private int directionCode;
-	private String name;
 	private int x, y;
 
-	Direction(int directionCode, String name) {
+	Direction(int directionCode) {
 		this.directionCode = directionCode;
-		this.name = name;
 		switch (this.directionCode) {
 		case 0:
 			x = 0;
