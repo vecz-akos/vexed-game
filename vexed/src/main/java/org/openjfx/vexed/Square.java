@@ -7,36 +7,42 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 public class Square {
-	Rectangle rectangle;
-	Point2D position;
+	private Rectangle rectangle;
+	private Point2D position;
+	private Point2D offset;
+	private Direction moveDirection;
+
 	public Colors color;
-	Point2D offset;
-	Direction moveDirection;
+	public Boolean waitToDelete;
 
 	Square() {
-		position = new Point2D(0, 0);
 		color = Colors.getColor(0);
+		rectangle = new Rectangle(0, 0, 0, 0);
+		rectangle.setFill(getColor());
+		position = new Point2D(0, 0);
 		offset = new Point2D(0, 0);
 		moveDirection = Direction.NOMOVE;
+		waitToDelete = false;
 	}
 
 	Square(int x, int y, int size, int color) {
 		this.color = Colors.getColor(color);
 		rectangle = new Rectangle(x, y, size, size);
 		rectangle.setFill(getColor());
-		rectangle.setOnMouseClicked((new EventHandler<MouseEvent>() {
-			public void handle(MouseEvent e) {
-				if (e.getX() > x + size / 2) {
-					moveDirection = Direction.RIGHT;
-				} else {
-					moveDirection = Direction.LEFT;
-				}
-				System.out.println("square(): " + ((e.getX() > (x + size / 2)) ? "right" : "left"));
-			}
-		}));
 		position = new Point2D(x, y);
 		offset = new Point2D(0, 0);
 		moveDirection = Direction.NOMOVE;
+		waitToDelete = false;
+
+		rectangle.setOnMouseClicked((new EventHandler<MouseEvent>() {
+			public void handle(MouseEvent e) {
+				if (e.getX() > getX() + size / 2) {
+					setDirection(Direction.RIGHT);
+				} else {
+					setDirection(Direction.LEFT);
+				}
+			}
+		}));
 	}
 
 	public boolean isMoveable() {
@@ -76,14 +82,18 @@ public class Square {
 		return moveDirection;
 	}
 
-	public void setNoMove() {
-		moveDirection = Direction.NOMOVE;
+	public void setDirection(Direction dir) {
+		if (isMoveable())
+			moveDirection = dir;
 	}
 
 	public void reset() {
-		color = Colors.WHITE;
-		moveDirection = Direction.NOMOVE;
-		rectangle.setFill(getColor());
-		offset = new Point2D(0, 0);
+		if (isMoveable()) {
+			color = Colors.WHITE;
+			moveDirection = Direction.NOMOVE;
+			rectangle.setFill(getColor());
+			offset = new Point2D(0, 0);
+			waitToDelete = false;
+		}
 	}
 }
