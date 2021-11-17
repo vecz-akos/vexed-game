@@ -14,7 +14,7 @@ public class Vexed {
 	private Scene scene;
 	private GraphicsContext gc;
 	Stage stage;
-	Canvas canvas;
+	//Canvas canvas;
 	AnimationTimer timer;
 
 	private GameBoard gameBoard;
@@ -29,9 +29,9 @@ public class Vexed {
 		playerPoints = 0;
 		isGameEnded = false;
 
-		canvas = new Canvas(colNum * squareSize, rowNum * squareSize);
-		root.getChildren().add(canvas);
-		gc = canvas.getGraphicsContext2D();
+		//canvas = new Canvas(colNum * squareSize, rowNum * squareSize);
+		//root.getChildren().add(canvas);
+		//gc = canvas.getGraphicsContext2D();
 		scene = new Scene(root, colNum * squareSize, rowNum * squareSize, Color.LIGHTGRAY);
 		this.stage = stage;
 		stage.setTitle("Vexed");
@@ -68,7 +68,11 @@ public class Vexed {
 			return;
 		}
 		
-		gameBoard.loadLevel(currentLevelIndex);
+		loadLevel(currentLevelIndex);
+	}
+	
+	private void loadLevel(int levelIndex) {
+		gameBoard.loadLevel(levelIndex);
 	}
 	
 	private void endGame() {

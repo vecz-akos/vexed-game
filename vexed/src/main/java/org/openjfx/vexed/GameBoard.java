@@ -32,6 +32,12 @@ public class GameBoard {
 
 	public void update() {
 		moveSquares();
+		if (isGravityNeed()) {
+			gravity();
+			moveSquares();
+		} else {
+			freeSquares();
+		}
 	}
 
 	public Square getSquare(int col, int row) {
@@ -63,14 +69,9 @@ public class GameBoard {
 	public void moveSquares() {
 		for (int row = 0; row < rowNum; row++) {
 			for (int col = 0; col < colNum; col++) {
-				Square square = getSquare(col, row);
-				moveSingleSquare(square);
+				moveSingleSquare(getSquare(col, row));
 			}
 		}
-
-		if (isGravityNeed())
-			gravity();
-		freeSquares();
 	}
 
 	// return true if something changed, false otherwise
@@ -184,13 +185,11 @@ public class GameBoard {
 	}
 
 	private void deleteSquares() {
-		boolean change = false;
 		for (int row = 0; row < rowNum; row++) {
 			for (int col = 0; col < colNum; col++) {
 				Square square = getSquare(col, row);
 				if (square.waitToDelete) {
 					deleteSquare(square);
-					change = true;
 				}
 			}
 		}
