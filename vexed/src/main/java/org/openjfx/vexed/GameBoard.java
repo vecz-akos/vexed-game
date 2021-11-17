@@ -209,11 +209,11 @@ public class GameBoard {
 		return true;
 	}
 
-	private int countMoveableSquares() {
+	public int countMoveableSquares() {
 		int counter = 0;
 		for (int row = 0; row < rowNum; row++) {
 			for (int col = 0; col < colNum; col++) {
-				if (board[row][col].isMoveable())
+				if (getSquare(col, row).isMoveable())
 					++counter;
 			}
 		}

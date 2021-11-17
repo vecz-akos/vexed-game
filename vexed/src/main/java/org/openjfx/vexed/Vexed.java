@@ -17,15 +17,17 @@ public class Vexed {
 	Canvas canvas;
 	AnimationTimer timer;
 
-	GameBoard gameBoard;
-	int currentLevel;
-	int playerPoints;
+	private GameBoard gameBoard;
+	private int currentLevelIndex;
+	private int playerPoints;
+	private boolean isGameEnded;
 
 	Vexed(Stage stage, int colNum, int rowNum, int squareSize) {
 		root = new Group();
 		gameBoard = new GameBoard(colNum, rowNum, squareSize, root);
-		currentLevel = 0;
+		currentLevelIndex = -1;
 		playerPoints = 0;
+		isGameEnded = false;
 
 		canvas = new Canvas(colNum * squareSize, rowNum * squareSize);
 		root.getChildren().add(canvas);
@@ -40,15 +42,38 @@ public class Vexed {
 
 		timer = new AnimationTimer() {
 			public void handle(long now) {
-				gameBoard.update();
+				update();
 			}
 		};
 
 		timer.start();
 	}
+	
+	private void update() {
+		if (isGameEnded) {
+			return;
+		} else {
+			if (gameBoard.countMoveableSquares() == 0)
+				nextLevel();
+			gameBoard.update();
+		}
+		
+		
+	}
 
-	public void nextLevel() {
-		gameBoard.loadLevel(currentLevel);
-		++currentLevel;
+	private void nextLevel() {
+		++currentLevelIndex;
+		if (currentLevelIndex >= gameBoard.levelsNum) {
+			endGame();
+			return;
+		}
+		
+		gameBoard.loadLevel(currentLevelIndex);
+	}
+	
+	private void endGame() {
+		isGameEnded = true;
+		currentLevelIndex = gameBoard.levelsNum - 1;
+		System.out.println("end of the game :)");
 	}
 }
