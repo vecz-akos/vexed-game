@@ -4,8 +4,12 @@ import java.io.*;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
-import javafx.scene.Group;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.paint.Color;
 
 public class GameBoard {
 
@@ -16,18 +20,25 @@ public class GameBoard {
 	final int rowNum;
 	final int colNum;
 	final int levelsNum = 2;
-	Group root;
+	private Canvas canvas;
+	private GraphicsContext gc;
 
-	GameBoard(int colNum, int rowNum, int squareSize, Group root) {
+	Triangle triangle;
+
+	GameBoard(int colNum, int rowNum, int squareSize, Canvas canvas) {
 		board = new Square[rowNum][colNum];
 		this.rowNum = rowNum;
 		this.colNum = colNum;
 		this.squareSize = squareSize;
-		this.root = root;
+		this.canvas = canvas;
+		gc = canvas.getGraphicsContext2D();
+		triangle = new Triangle(squareSize);
 		gravityDirection = Direction.DOWN;
 
 		levelsData = new int[levelsNum][rowNum][colNum];
 		readLevelFile();
+
+		addMouseEvents();
 	}
 
 	public void update() {
@@ -38,6 +49,76 @@ public class GameBoard {
 		} else {
 			freeSquares();
 		}
+
+		draw();
+	}
+
+	private void draw() {
+		clearCanvas();
+		for (int row = 0; row < rowNum; row++) {
+			for (int col = 0; col < colNum; col++) {
+				getSquare(col, row).draw(gc);
+			}
+		}
+		triangle.drawTo(gc);
+	}
+
+	private void addMouseEvents() {
+		canvas.addEventHandler(
+			MouseEvent.MOUSE_CLICKED,
+			new EventHandler<MouseEvent>() {
+				@Override
+				public void handle(MouseEvent e) {
+					final double mouseX = e.getX();
+					final double mouseY = e.getY();
+					Square square = getSquareByMousePos(mouseX, mouseY);
+					if (square != null) {
+						square.setDirection(mouseX);
+						triangle.reset();
+					}
+				}
+			}
+		);
+
+		canvas.addEventHandler(
+			MouseEvent.MOUSE_MOVED,
+			new EventHandler<MouseEvent>() {
+				@Override
+				public void handle(MouseEvent e) {
+					final double mouseX = e.getX();
+					final double mouseY = e.getY();
+					Square square = getSquareByMousePos(mouseX, mouseY);
+					if (square != null) {
+						if (square.isMoveable()) {
+							if (square.isItTheLeftSide(mouseX)) {
+								// left arrow
+								triangle.setLeftDirection(square.getPosition());
+							} else {
+								// right arrow
+								triangle.setRightDirection(square.getPosition());
+							}
+						} else {
+							triangle.reset();
+						}
+					}
+				}
+			}
+		);
+	}
+
+	private Square getSquareByMousePos(double mouseX, double mouseY) {
+		final int squareX = (int)mouseX / squareSize;
+		final int squareY = (int)mouseY / squareSize;
+
+		if (isValidPlace(squareX, squareY))
+			return getSquare(squareX, squareY);
+		
+		return null;
+	}
+
+	private void clearCanvas() {
+		gc.setFill(Color.WHEAT);
+		gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
 	}
 
 	public Square getSquare(int col, int row) {
@@ -59,9 +140,12 @@ public class GameBoard {
 	public void loadLevel(int levelNum) {
 		for (int row = 0; row < rowNum; row++) {
 			for (int col = 0; col < colNum; col++) {
-				board[row][col] = new Square(col * squareSize, row * squareSize, squareSize,
-						levelsData[levelNum][row][col]);
-				root.getChildren().add(board[row][col].getRectengle());
+				board[row][col] = new Square(
+					col * squareSize,
+					row * squareSize,
+					squareSize,
+					levelsData[levelNum][row][col]
+				);
 			}
 		}
 	}
@@ -124,20 +208,15 @@ public class GameBoard {
 		final int endY = beginY > 1 ? 0 : rowNum - 1;
 		final int deltaX = beginX > 1 ? -1 : 1;
 		final int deltaY = beginY > 1 ? -1 : 1;
-		boolean change = false;
 		
 		for (int col = beginX; col != endX; col += deltaX) {
 			for (int row = beginY; row != endY; row += deltaY) {
 				Square square = getSquare(col, row);
 				if (isSquareCanFall(square)) {
 					square.setDirection(gravityDirection);
-					change = true;
 				}
 			}
 		}
-
-		if (change)
-			moveSquares();
 	}
 
 	private boolean isSquareCanFall(Square square) {
@@ -193,8 +272,6 @@ public class GameBoard {
 				}
 			}
 		}
-		if (isGravityNeed())
-			gravity();
 	}
 
 	private void deleteSquare(Square square) {
@@ -202,8 +279,14 @@ public class GameBoard {
 	}
 
 	public boolean isValidPlace(Point2D place) {
-		if ((int) place.getX() >= colNum || (int) place.getY() >= rowNum || (int) place.getX() < 0
-				|| (int) place.getY() < 0)
+		if ((int) place.getX() >= colNum || (int) place.getY() >= rowNum
+				|| (int) place.getX() < 0 || (int) place.getY() < 0)
+			return false;
+		return true;
+	}
+
+	public boolean isValidPlace(int col, int row) {
+		if (col >= colNum || row >= rowNum || col < 0 || row < 0)
 			return false;
 		return true;
 	}

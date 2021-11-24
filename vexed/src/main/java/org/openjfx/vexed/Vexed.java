@@ -1,38 +1,45 @@
 package org.openjfx.vexed;
 
 import javafx.animation.AnimationTimer;
+import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 
 public class Vexed {
 
 	private Group root;
 	private Scene scene;
-	private GraphicsContext gc;
 	Stage stage;
-	//Canvas canvas;
+	Canvas canvas;
 	AnimationTimer timer;
 
+	private int margin;
+	private InfoPanel infoPanel;
 	private GameBoard gameBoard;
 	private int currentLevelIndex;
-	private int playerPoints;
 	private boolean isGameEnded;
 
 	Vexed(Stage stage, int colNum, int rowNum, int squareSize) {
 		root = new Group();
-		gameBoard = new GameBoard(colNum, rowNum, squareSize, root);
+		margin = squareSize/4;
 		currentLevelIndex = -1;
-		playerPoints = 0;
 		isGameEnded = false;
 
-		//canvas = new Canvas(colNum * squareSize, rowNum * squareSize);
-		//root.getChildren().add(canvas);
-		//gc = canvas.getGraphicsContext2D();
-		scene = new Scene(root, colNum * squareSize, rowNum * squareSize, Color.LIGHTGRAY);
+		canvas = new Canvas(colNum * squareSize, rowNum * squareSize);
+		canvas.setTranslateX(margin);
+		canvas.setTranslateY(margin);
+		root.getChildren().add(canvas);
+		gameBoard = new GameBoard(colNum, rowNum, squareSize, canvas);
+		infoPanel = new InfoPanel(root, new Point2D(margin, 2*margin + rowNum*squareSize), canvas.getWidth(), squareSize);
+		infoPanel.attach();
+		scene = new Scene(
+			root,
+			canvas.getWidth() + 2*margin,
+			canvas.getHeight() + 3*margin + infoPanel.height,
+			Colors.WHITE.getColor()
+		);
 		this.stage = stage;
 		stage.setTitle("Vexed");
 		stage.setScene(scene);
@@ -57,8 +64,6 @@ public class Vexed {
 				nextLevel();
 			gameBoard.update();
 		}
-		
-		
 	}
 
 	private void nextLevel() {
@@ -67,7 +72,9 @@ public class Vexed {
 			endGame();
 			return;
 		}
-		
+
+		infoPanel.addPlayerPoints(2);
+		infoPanel.setCurrentLevel(currentLevelIndex+1);
 		loadLevel(currentLevelIndex);
 	}
 	

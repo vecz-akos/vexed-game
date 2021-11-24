@@ -1,14 +1,12 @@
 package org.openjfx.vexed;
 
-import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 
 public class Square {
-	private Rectangle rectangle;
 	private Point2D position;
+	private double size;
 	private Point2D offset;
 	private Direction moveDirection;
 
@@ -17,8 +15,6 @@ public class Square {
 
 	Square() {
 		color = Colors.getColor(0);
-		rectangle = new Rectangle(0, 0, 0, 0);
-		rectangle.setFill(getColor());
 		position = new Point2D(0, 0);
 		offset = new Point2D(0, 0);
 		moveDirection = Direction.NOMOVE;
@@ -27,30 +23,24 @@ public class Square {
 
 	Square(int x, int y, int size, int color) {
 		this.color = Colors.getColor(color);
-		rectangle = new Rectangle(x, y, size, size);
-		rectangle.setFill(getColor());
 		position = new Point2D(x, y);
+		this.size = size;
 		offset = new Point2D(0, 0);
 		moveDirection = Direction.NOMOVE;
 		waitToDelete = false;
+	}
 
-		rectangle.setOnMouseClicked((new EventHandler<MouseEvent>() {
-			public void handle(MouseEvent e) {
-				if (e.getX() > getX() + size / 2) {
-					setDirection(Direction.RIGHT);
-				} else {
-					setDirection(Direction.LEFT);
-				}
-			}
-		}));
+	public void draw(GraphicsContext gc) {
+		gc.setFill(getColor());
+		gc.fillRect(
+			position.getX() + offset.getX(),
+			position.getY() + offset.getY(),
+			size, size
+		);
 	}
 
 	public boolean isMoveable() {
 		return color.getColorCode() != 0 && color.getColorCode() != 9;
-	}
-
-	public Rectangle getRectengle() {
-		return rectangle;
 	}
 
 	public Color getColor() {
@@ -59,7 +49,10 @@ public class Square {
 
 	public void setColor(Colors color) {
 		this.color = color;
-		rectangle.setFill(getColor());
+	}
+
+	public Point2D getPosition() {
+		return position;
 	}
 
 	public double getX() {
@@ -71,11 +64,11 @@ public class Square {
 	}
 
 	public int getCol() {
-		return (int) (position.getX() / rectangle.getWidth());
+		return (int) (position.getX() / size);
 	}
 
 	public int getRow() {
-		return (int) (position.getY() / rectangle.getHeight());
+		return (int) (position.getY() / size);
 	}
 
 	public Direction getMoveDirection() {
@@ -87,11 +80,26 @@ public class Square {
 			moveDirection = dir;
 	}
 
+	public void setDirection(double x) {
+		if (isMoveable()) {
+			if (isItTheLeftSide(x)) {
+				moveDirection = Direction.LEFT;
+			} else {
+				moveDirection = Direction.RIGHT;
+			}
+		}
+	}
+
+	public boolean isItTheLeftSide(double x) {
+		if (x < getX() + (size / 2))
+			return true;
+		return false;
+	}
+
 	public void reset() {
 		if (isMoveable()) {
 			color = Colors.WHITE;
 			moveDirection = Direction.NOMOVE;
-			rectangle.setFill(getColor());
 			offset = new Point2D(0, 0);
 			waitToDelete = false;
 		}
