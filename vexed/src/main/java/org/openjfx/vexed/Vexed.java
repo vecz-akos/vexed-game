@@ -20,6 +20,7 @@ public class Vexed {
 	private GameBoard gameBoard;
 	private int currentLevelIndex;
 	private boolean isGameEnded;
+	private boolean waitToUser = false;
 
 	Vexed(Stage stage, int colNum, int rowNum, int squareSize) {
 		root = new Group();
@@ -61,13 +62,16 @@ public class Vexed {
 		if (isGameEnded) {
 			return;
 		} else {
-			if (gameBoard.countMoveableSquares() == 0)
-				nextLevel();
+			if (gameBoard.countMoveableSquares() == 0 && !waitToUser) {
+				waitToUser = true;
+				infoPanel.nextLvlBtnOnOff();
+			}
 			gameBoard.update();
 		}
 	}
 
-	private void nextLevel() {
+	public void nextLevel() {
+		waitToUser = false;
 		++currentLevelIndex;
 		if (currentLevelIndex >= gameBoard.levelsNum) {
 			endGame();

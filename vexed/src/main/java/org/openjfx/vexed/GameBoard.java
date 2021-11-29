@@ -15,12 +15,16 @@ public class GameBoard {
 	private int[][][] levelsData;
 	private Square[][] board;
 	final int squareSize;
-	final Direction gravityDirection;
 	final int rowNum;
 	final int colNum;
 	final int levelsNum = 2;
+	final Direction gravityDirection;
 	private Canvas canvas;
 	private GraphicsContext gc;
+
+	private boolean animationOn = false;
+	private static final int animationDuration = 8;
+	private int currentFrame = 0;
 
 	Triangle triangle;
 
@@ -41,15 +45,31 @@ public class GameBoard {
 	}
 
 	public void update() {
-		moveSquares();
-		if (isGravityNeed()) {
-			gravity();
-			moveSquares();
+		if (animationOn) {
+			animation();
 		} else {
-			freeSquares();
+			moveSquares();
+			if (isGravityNeed()) {
+				gravity();
+			} else {
+				freeSquares();
+			}
 		}
 
 		draw();
+	}
+
+	private void animation() {
+		for (int row = 0; row < rowNum; row++) {
+			for (int col = 0; col < colNum; col++) {
+				getSquare(col, row).addOffset();
+			}
+		}
+		currentFrame++;
+		if (currentFrame == animationDuration) {
+			animationOn = false;
+			currentFrame = 0;
+		}
 	}
 
 	private void draw() {
@@ -68,13 +88,21 @@ public class GameBoard {
 			new EventHandler<MouseEvent>() {
 				@Override
 				public void handle(MouseEvent e) {
+					if (animationOn)
+						return;
+					
 					final double mouseX = e.getX();
 					final double mouseY = e.getY();
 					Square square = getSquareByMousePos(mouseX, mouseY);
 					if (square != null) {
 						square.setDirection(mouseX);
+						if (!isSquareFreeToMove(square)) {
+							square.setDirection(Direction.NOMOVE);
+						}
 						triangle.reset();
 					}
+					if (square.getMoveDirection() != Direction.NOMOVE)
+						animationOn = true;
 				}
 			}
 		);
@@ -84,6 +112,9 @@ public class GameBoard {
 			new EventHandler<MouseEvent>() {
 				@Override
 				public void handle(MouseEvent e) {
+					if (animationOn)
+						return;
+					
 					final double mouseX = e.getX();
 					final double mouseY = e.getY();
 					Square square = getSquareByMousePos(mouseX, mouseY);
@@ -136,6 +167,21 @@ public class GameBoard {
 		return board[(int) place.getY() + dir.getY()][(int) place.getX() + dir.getX()];
 	}
 
+	private boolean isSquareFreeToMove(Square square) {
+		Direction moveDirection = square.getMoveDirection();
+		if (!square.isMoveable())
+			return false;
+
+		Point2D aimPlace = new Point2D(square.getCol() + moveDirection.getX(), square.getRow() + moveDirection.getY());
+		if (!isValidPlace(aimPlace))
+			return false;
+
+		Square aimSquare = getSquare(aimPlace);
+		if (aimSquare.color == Colors.WHITE || aimSquare.getMoveDirection() != Direction.NOMOVE)
+			return true;
+		return false;
+	}
+
 	public void loadLevel(int levelNum) {
 		for (int row = 0; row < rowNum; row++) {
 			for (int col = 0; col < colNum; col++) {
@@ -150,8 +196,15 @@ public class GameBoard {
 	}
 
 	public void moveSquares() {
-		for (int row = 0; row < rowNum; row++) {
-			for (int col = 0; col < colNum; col++) {
+		final int beginX = gravityDirection.getX() > 0 ? colNum - 1 : 1;
+		final int beginY = gravityDirection.getY() > 0 ? rowNum - 1 : 1;
+		final int endX = beginX > 1 ? 0 : colNum - 1;
+		final int endY = beginY > 1 ? 0 : rowNum - 1;
+		final int deltaX = beginX > 1 ? -1 : 1;
+		final int deltaY = beginY > 1 ? -1 : 1;
+		
+		for (int col = beginX; col != endX; col += deltaX) {
+			for (int row = beginY; row != endY; row += deltaY) {
 				moveSingleSquare(getSquare(col, row));
 			}
 		}
@@ -163,22 +216,18 @@ public class GameBoard {
 		if (moveDirection == Direction.NOMOVE)
 			return false;
 
-		Point2D aimPlace = new Point2D(square.getCol() + moveDirection.getX(), square.getRow() + moveDirection.getY());
-		if (!isValidPlace(aimPlace) || !square.isMoveable()) {
-			square.setDirection(Direction.NOMOVE);
-			return false;
+		if (isSquareFreeToMove(square)) {
+			Point2D aimPlace = new Point2D(square.getCol() + moveDirection.getX(), square.getRow() + moveDirection.getY());
+			Square aimSquare = getSquare(aimPlace);
+
+			aimSquare.setColor(square.color);
+			square.reset();
+
+			return true;
 		}
 
-		Square aimSquare = getSquare(aimPlace);
-		if (aimSquare.color != Colors.WHITE) {
-			square.setDirection(Direction.NOMOVE);
-			return false;
-		}
-
-		aimSquare.setColor(square.color);
-		square.reset();
-
-		return true;
+		square.setDirection(Direction.NOMOVE);
+		return false;
 	}
 
 	private boolean isGravityNeed() {
@@ -213,6 +262,7 @@ public class GameBoard {
 				Square square = getSquare(col, row);
 				if (isSquareCanFall(square)) {
 					square.setDirection(gravityDirection);
+					animationOn = true;
 				}
 			}
 		}

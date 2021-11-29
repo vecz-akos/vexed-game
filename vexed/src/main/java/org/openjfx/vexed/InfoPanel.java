@@ -20,6 +20,7 @@ public class InfoPanel {
 	private int currentLevel;
 
 	private Button reloadButton;
+	private Button nextLvlButton;
 
 	InfoPanel(Point2D pos, double width, double height, Vexed vexed) {
 		panel = new Group();
@@ -35,22 +36,38 @@ public class InfoPanel {
 		levelText = new Text(position.getX(), position.getY() + 3*insideMargin, generateLevelText());
 		setFontStyle(levelText);
 
-		String buttonStyle =
-			"-fx-background-color: " + Colors.GREEN.rgb + ";" +
-			"-fx-text-fill: " + Colors.WHITE.rgb + ";";
-		reloadButton = new Button("Reload");
-		reloadButton.setMinHeight(height);
-		reloadButton.setStyle(buttonStyle);
-		reloadButton.setTranslateX(pos.getX() + width - insideMargin - 3*height);
-		reloadButton.setTranslateY(pos.getY() + height/2 - height/2);
-
+		initButtons();
 		reloadButton.setOnAction(value -> vexed.loadLevel());
+		nextLvlButton.setOnAction(value -> {vexed.nextLevel(); nextLvlBtnOnOff();});
 
-		panel.getChildren().addAll(pointText, levelText, reloadButton);
+		panel.getChildren().addAll(pointText, levelText, reloadButton, nextLvlButton);
 	}
 
 	public void attach(Group parent) {
 		parent.getChildren().add(panel);
+	}
+
+	private void initButtons() {
+		String buttonStyle =
+			"-fx-text-fill: " + Colors.WHITE.rgb + ";" +
+			"-fx-cursor: hand;";
+		String reloadButtonStyle = buttonStyle +
+			"-fx-background-color: " + Colors.GREEN.rgb + ";";
+		String nextLvlButtonStyle = buttonStyle +
+			"-fx-background-color: " + Colors.YELLOW.rgb + ";";
+		
+		reloadButton = new Button("Reload");
+		reloadButton.setMinHeight(height);
+		reloadButton.setStyle(reloadButtonStyle);
+		reloadButton.setTranslateX(position.getX() + width - 2*insideMargin - 4*height);
+		reloadButton.setTranslateY(position.getY() + height/2 - height/2);
+		
+		nextLvlButton = new Button("Next level");
+		nextLvlButton.setMinHeight(height);
+		nextLvlButton.setStyle(nextLvlButtonStyle);
+		nextLvlButton.setTranslateX(position.getX() + width - insideMargin - 3*height);
+		nextLvlButton.setTranslateY(position.getY() + height/2 - height/2);
+		nextLvlButton.setVisible(false);
 	}
 
 	public void addPlayerPoints(int points) {
@@ -61,6 +78,10 @@ public class InfoPanel {
 	public void setCurrentLevel(int level) {
 		currentLevel = level;
 		levelText.setText(generateLevelText());
+	}
+
+	public void nextLvlBtnOnOff() {
+		nextLvlButton.setVisible(!nextLvlButton.isVisible());
 	}
 
 	private String generatePointText() {

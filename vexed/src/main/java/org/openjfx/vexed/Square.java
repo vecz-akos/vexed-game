@@ -9,6 +9,7 @@ public class Square {
 	private double size;
 	private Point2D offset;
 	private Direction moveDirection;
+	private static final int animationDuration = 8;
 
 	public Colors color;
 	public Boolean waitToDelete;
@@ -31,6 +32,8 @@ public class Square {
 	}
 
 	public void draw(GraphicsContext gc) {
+		if (color == Colors.WHITE)
+			return;
 		gc.setFill(getColor());
 		gc.fillRect(
 			position.getX() + offset.getX(),
@@ -88,6 +91,13 @@ public class Square {
 				moveDirection = Direction.RIGHT;
 			}
 		}
+	}
+
+	public void addOffset() {
+		offset = offset.add(
+			moveDirection.getX() * (size/animationDuration),
+			moveDirection.getY() * (size/animationDuration)
+		);
 	}
 
 	public boolean isItTheLeftSide(double x) {
