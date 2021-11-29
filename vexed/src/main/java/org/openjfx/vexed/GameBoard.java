@@ -9,7 +9,6 @@ import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.paint.Color;
 
 public class GameBoard {
 
@@ -117,7 +116,7 @@ public class GameBoard {
 	}
 
 	private void clearCanvas() {
-		gc.setFill(Color.WHEAT);
+		gc.setFill(Colors.WHITE.getColor());
 		gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
 	}
 

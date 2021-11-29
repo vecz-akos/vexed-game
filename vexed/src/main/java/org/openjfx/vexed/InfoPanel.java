@@ -3,11 +3,12 @@ package org.openjfx.vexed;
 import javafx.geometry.Point2D;
 import javafx.geometry.VPos;
 import javafx.scene.Group;
+import javafx.scene.control.Button;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
 public class InfoPanel {
-	private Group root;
+	private Group panel;
 	private Point2D position;
 	public double width;
 	public double height;
@@ -18,8 +19,10 @@ public class InfoPanel {
 	private Text levelText;
 	private int currentLevel;
 
-	InfoPanel(Group root, Point2D pos, double width, double height) {
-		this.root = root;
+	private Button reloadButton;
+
+	InfoPanel(Point2D pos, double width, double height, Vexed vexed) {
+		panel = new Group();
 		position = pos;
 		this.width = width;
 		this.height = height;
@@ -31,10 +34,23 @@ public class InfoPanel {
 
 		levelText = new Text(position.getX(), position.getY() + 3*insideMargin, generateLevelText());
 		setFontStyle(levelText);
+
+		String buttonStyle =
+			"-fx-background-color: " + Colors.GREEN.rgb + ";" +
+			"-fx-text-fill: " + Colors.WHITE.rgb + ";";
+		reloadButton = new Button("Reload");
+		reloadButton.setMinHeight(height);
+		reloadButton.setStyle(buttonStyle);
+		reloadButton.setTranslateX(pos.getX() + width - insideMargin - 3*height);
+		reloadButton.setTranslateY(pos.getY() + height/2 - height/2);
+
+		reloadButton.setOnAction(value -> vexed.loadLevel());
+
+		panel.getChildren().addAll(pointText, levelText, reloadButton);
 	}
 
-	public void attach() {
-		root.getChildren().addAll(pointText, levelText);
+	public void attach(Group parent) {
+		parent.getChildren().add(panel);
 	}
 
 	public void addPlayerPoints(int points) {

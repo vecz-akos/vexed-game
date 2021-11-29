@@ -32,8 +32,8 @@ public class Vexed {
 		canvas.setTranslateY(margin);
 		root.getChildren().add(canvas);
 		gameBoard = new GameBoard(colNum, rowNum, squareSize, canvas);
-		infoPanel = new InfoPanel(root, new Point2D(margin, 2*margin + rowNum*squareSize), canvas.getWidth(), squareSize);
-		infoPanel.attach();
+		infoPanel = new InfoPanel(new Point2D(margin, 2*margin + rowNum*squareSize), canvas.getWidth(), squareSize, this);
+		infoPanel.attach(root);
 		scene = new Scene(
 			root,
 			canvas.getWidth() + 2*margin,
@@ -41,6 +41,7 @@ public class Vexed {
 			Colors.WHITE.getColor()
 		);
 		this.stage = stage;
+		stage.setResizable(false);
 		stage.setTitle("Vexed");
 		stage.setScene(scene);
 		nextLevel();
@@ -75,11 +76,15 @@ public class Vexed {
 
 		infoPanel.addPlayerPoints(2);
 		infoPanel.setCurrentLevel(currentLevelIndex+1);
-		loadLevel(currentLevelIndex);
+		loadLevel();
 	}
 	
 	private void loadLevel(int levelIndex) {
 		gameBoard.loadLevel(levelIndex);
+	}
+	
+	public void loadLevel() {
+		loadLevel(currentLevelIndex);
 	}
 	
 	private void endGame() {
