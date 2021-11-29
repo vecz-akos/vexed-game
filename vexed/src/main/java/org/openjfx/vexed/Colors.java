@@ -7,7 +7,7 @@ public enum Colors {
 	BLACK(9, "#1c1818"), WHITE(0, "#f9eaea"), RED(1, "#c62535"), YELLOW(2, "#F1AF34"), GREEN(3, "#86c625");
 
 	private final int colorCode;
-	private final String rgb;
+	final String rgb;
 
 	Colors(int colorCode, String rgb) {
 		this.colorCode = colorCode;
