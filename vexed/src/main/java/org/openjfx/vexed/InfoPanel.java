@@ -18,17 +18,20 @@ public class InfoPanel {
 	private int playerPoints;
 	private Text levelText;
 	private int currentLevel;
+	private final int levelsNum;
 
 	private Button reloadButton;
 	private Button nextLvlButton;
+	private Button quitButton;
 
-	InfoPanel(Point2D pos, double width, double height, Vexed vexed) {
+	InfoPanel(Point2D pos, double width, double height, Vexed vexed, int levelsNum) {
 		panel = new Group();
 		position = pos;
 		this.width = width;
 		this.height = height;
 		insideMargin = height/8;
 		playerPoints = 0;
+		this.levelsNum = levelsNum;
 
 		pointText = new Text(position.getX(), position.getY(), generatePointText());
 		setFontStyle(pointText);
@@ -38,9 +41,10 @@ public class InfoPanel {
 
 		initButtons();
 		reloadButton.setOnAction(value -> vexed.loadLevel());
-		nextLvlButton.setOnAction(value -> {vexed.nextLevel(); nextLvlBtnOnOff();});
+		nextLvlButton.setOnAction(value -> vexed.nextLevel());
+		quitButton.setOnAction(value -> vexed.quit());
 
-		panel.getChildren().addAll(pointText, levelText, reloadButton, nextLvlButton);
+		panel.getChildren().addAll(pointText, levelText, reloadButton, nextLvlButton, quitButton);
 	}
 
 	public void attach(Group parent) {
@@ -55,19 +59,30 @@ public class InfoPanel {
 			"-fx-background-color: " + Colors.GREEN.rgb + ";";
 		String nextLvlButtonStyle = buttonStyle +
 			"-fx-background-color: " + Colors.YELLOW.rgb + ";";
+		String quitButtonStyle = buttonStyle +
+			"-fx-background-color: " + Colors.RED.rgb + ";";
 		
 		reloadButton = new Button("Reload");
 		reloadButton.setMinHeight(height);
+		reloadButton.setMinWidth(height);
 		reloadButton.setStyle(reloadButtonStyle);
 		reloadButton.setTranslateX(position.getX() + width - 2*insideMargin - 4*height);
 		reloadButton.setTranslateY(position.getY() + height/2 - height/2);
 		
 		nextLvlButton = new Button("Next level");
 		nextLvlButton.setMinHeight(height);
+		nextLvlButton.setMinWidth(height);
 		nextLvlButton.setStyle(nextLvlButtonStyle);
 		nextLvlButton.setTranslateX(position.getX() + width - insideMargin - 3*height);
 		nextLvlButton.setTranslateY(position.getY() + height/2 - height/2);
-		nextLvlButton.setVisible(false);
+		
+		quitButton = new Button("Quit");
+		quitButton.setMinHeight(height);
+		quitButton.setMinWidth(height);
+		quitButton.setStyle(quitButtonStyle);
+		quitButton.setTranslateX(position.getX() + width - insideMargin - 3*height);
+		quitButton.setTranslateY(position.getY() + height/2 - height/2);
+		quitButton.setVisible(false);
 	}
 
 	public void addPlayerPoints(int points) {
@@ -80,8 +95,18 @@ public class InfoPanel {
 		levelText.setText(generateLevelText());
 	}
 
+	public void reloadBtnOnOff() {
+		reloadButton.setVisible(!reloadButton.isVisible());
+	}
+
 	public void nextLvlBtnOnOff() {
+		quitButton.setVisible(false);
 		nextLvlButton.setVisible(!nextLvlButton.isVisible());
+	}
+
+	public void quitBtnOnOff() {
+		nextLvlButton.setVisible(false);
+		quitButton.setVisible(!quitButton.isVisible());
 	}
 
 	private String generatePointText() {
@@ -89,7 +114,7 @@ public class InfoPanel {
 	}
 
 	private String generateLevelText() {
-		return "Level " + currentLevel;
+		return "Level " + currentLevel + " / " + levelsNum;
 	}
 
 	private void setFontStyle(Text txt) {

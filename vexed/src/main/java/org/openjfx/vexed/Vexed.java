@@ -1,6 +1,7 @@
 package org.openjfx.vexed;
 
 import javafx.animation.AnimationTimer;
+import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -22,7 +23,7 @@ public class Vexed {
 	private boolean isGameEnded;
 	private boolean waitToUser = false;
 
-	Vexed(Stage stage, int colNum, int rowNum, int squareSize) {
+	Vexed(Stage stage, int colNum, int rowNum, int squareSize, int levelsNum) {
 		root = new Group();
 		margin = squareSize/4;
 		currentLevelIndex = -1;
@@ -32,8 +33,8 @@ public class Vexed {
 		canvas.setTranslateX(margin);
 		canvas.setTranslateY(margin);
 		root.getChildren().add(canvas);
-		gameBoard = new GameBoard(colNum, rowNum, squareSize, canvas);
-		infoPanel = new InfoPanel(new Point2D(margin, 2*margin + rowNum*squareSize), canvas.getWidth(), squareSize, this);
+		gameBoard = new GameBoard(colNum, rowNum, squareSize, canvas, levelsNum);
+		infoPanel = new InfoPanel(new Point2D(margin, 2*margin + rowNum*squareSize), canvas.getWidth(), squareSize, this, gameBoard.levelsNum);
 		infoPanel.attach(root);
 		scene = new Scene(
 			root,
@@ -47,14 +48,15 @@ public class Vexed {
 		stage.setScene(scene);
 		nextLevel();
 
-		stage.show();
-
 		timer = new AnimationTimer() {
 			public void handle(long now) {
 				update();
 			}
 		};
+	}
 
+	public void start() {
+		stage.show();
 		timer.start();
 	}
 	
@@ -64,13 +66,17 @@ public class Vexed {
 		} else {
 			if (gameBoard.countMoveableSquares() == 0 && !waitToUser) {
 				waitToUser = true;
-				infoPanel.nextLvlBtnOnOff();
+				if (currentLevelIndex >= gameBoard.levelsNum-1)
+					endGame();
+				else
+					infoPanel.nextLvlBtnOnOff();
 			}
 			gameBoard.update();
 		}
 	}
 
 	public void nextLevel() {
+		infoPanel.nextLvlBtnOnOff();
 		waitToUser = false;
 		++currentLevelIndex;
 		if (currentLevelIndex >= gameBoard.levelsNum) {
@@ -94,6 +100,12 @@ public class Vexed {
 	private void endGame() {
 		isGameEnded = true;
 		currentLevelIndex = gameBoard.levelsNum - 1;
-		System.out.println("end of the game :)");
+		infoPanel.reloadBtnOnOff();
+		infoPanel.quitBtnOnOff();
+	}
+
+	public void quit() {
+		timer.stop();
+		Platform.exit();
 	}
 }

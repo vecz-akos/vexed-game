@@ -17,7 +17,7 @@ public class GameBoard {
 	final int squareSize;
 	final int rowNum;
 	final int colNum;
-	final int levelsNum = 2;
+	final int levelsNum;
 	final Direction gravityDirection;
 	private Canvas canvas;
 	private GraphicsContext gc;
@@ -28,10 +28,11 @@ public class GameBoard {
 
 	Triangle triangle;
 
-	GameBoard(int colNum, int rowNum, int squareSize, Canvas canvas) {
+	GameBoard(int colNum, int rowNum, int squareSize, Canvas canvas, int levelsNum) {
 		board = new Square[rowNum][colNum];
 		this.rowNum = rowNum;
 		this.colNum = colNum;
+		this.levelsNum = levelsNum;
 		this.squareSize = squareSize;
 		this.canvas = canvas;
 		gc = canvas.getGraphicsContext2D();
@@ -353,14 +354,15 @@ public class GameBoard {
 
 	private void readLevelFile() {
 		try {
-			String pathToLevelsFile = new File("src\\main\\java\\org\\openjfx\\vexed\\leveldata_test.txt")
+			String pathToLevelsFile = new File("src\\main\\java\\org\\openjfx\\vexed\\boards.txt")
 					.getAbsolutePath();
 			FileInputStream levelsDataReader = new FileInputStream(pathToLevelsFile);
 
 			int i;
 			byte lineCounter = 0;
 
-			while (lineCounter < 4) {
+			// read header
+			while (lineCounter < 5) {
 				i = levelsDataReader.read();
 				if (i == '\n') {
 					++lineCounter;
@@ -370,12 +372,8 @@ public class GameBoard {
 			int level = 0, row = 0, col = 0;
 
 			for (level = 0; level < levelsNum; ++level) {
-				lineCounter = 0;
-				while (lineCounter < 2) {
+				for (int charNum = 0; charNum < 14; charNum++) {
 					i = levelsDataReader.read();
-					if (i == '\n') {
-						++lineCounter;
-					}
 				}
 				for (row = 0; row < rowNum; ++row) {
 					for (col = 0; col < colNum; ++col) {
