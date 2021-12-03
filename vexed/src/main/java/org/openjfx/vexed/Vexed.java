@@ -34,7 +34,13 @@ public class Vexed {
 		canvas.setTranslateY(margin);
 		root.getChildren().add(canvas);
 		gameBoard = new GameBoard(colNum, rowNum, squareSize, canvas, levelsNum);
-		infoPanel = new InfoPanel(new Point2D(margin, 2*margin + rowNum*squareSize), canvas.getWidth(), squareSize, this, gameBoard.levelsNum);
+		infoPanel = new InfoPanel(
+			new Point2D(margin, 2*margin + rowNum*squareSize),
+			canvas.getWidth(),
+			squareSize,
+			this,
+			gameBoard.levelsNum
+		);
 		infoPanel.attach(root);
 		scene = new Scene(
 			root,
@@ -46,7 +52,6 @@ public class Vexed {
 		stage.setResizable(false);
 		stage.setTitle("Vexed");
 		stage.setScene(scene);
-		nextLevel();
 
 		timer = new AnimationTimer() {
 			public void handle(long now) {
@@ -56,6 +61,7 @@ public class Vexed {
 	}
 
 	public void start() {
+		nextLevel();
 		stage.show();
 		timer.start();
 	}
@@ -71,6 +77,10 @@ public class Vexed {
 				else
 					infoPanel.nextLvlBtnOnOff();
 			}
+
+			if (gameBoard.isValidClickHappened())
+				infoPanel.addMoveNum();
+			
 			gameBoard.update();
 		}
 	}
@@ -84,7 +94,7 @@ public class Vexed {
 			return;
 		}
 
-		infoPanel.addPlayerPoints(2);
+		infoPanel.addPlayerScore();
 		infoPanel.setCurrentLevel(currentLevelIndex+1);
 		loadLevel();
 	}
@@ -95,11 +105,13 @@ public class Vexed {
 	
 	public void loadLevel() {
 		loadLevel(currentLevelIndex);
+		infoPanel.resetMoveNum();
 	}
 	
 	private void endGame() {
 		isGameEnded = true;
 		currentLevelIndex = gameBoard.levelsNum - 1;
+		infoPanel.addPlayerScore();
 		infoPanel.reloadBtnOnOff();
 		infoPanel.quitBtnOnOff();
 	}

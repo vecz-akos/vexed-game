@@ -14,11 +14,13 @@ public class InfoPanel {
 	public double height;
 	private double insideMargin;
 
-	private Text pointText;
-	private int playerPoints;
+	private Text scoreText;
+	private int playerScore;
 	private Text levelText;
 	private int currentLevel;
 	private final int levelsNum;
+	private Text moveNumText;
+	private int moveNum;
 
 	private Button reloadButton;
 	private Button nextLvlButton;
@@ -29,22 +31,25 @@ public class InfoPanel {
 		position = pos;
 		this.width = width;
 		this.height = height;
-		insideMargin = height/8;
-		playerPoints = 0;
+		insideMargin = height/16;
+		playerScore = 0;
 		this.levelsNum = levelsNum;
 
-		pointText = new Text(position.getX(), position.getY(), generatePointText());
-		setFontStyle(pointText);
+		scoreText = new Text(position.getX(), position.getY(), generateScoreText());
+		setFontStyle(scoreText);
 
-		levelText = new Text(position.getX(), position.getY() + 3*insideMargin, generateLevelText());
+		levelText = new Text(position.getX(), position.getY() + 5*insideMargin, generateLevelText());
 		setFontStyle(levelText);
+
+		moveNumText = new Text(position.getX(), position.getY() + 10*insideMargin, generateMoveNumText());
+		setFontStyle(moveNumText);
 
 		initButtons();
 		reloadButton.setOnAction(value -> vexed.loadLevel());
 		nextLvlButton.setOnAction(value -> vexed.nextLevel());
 		quitButton.setOnAction(value -> vexed.quit());
 
-		panel.getChildren().addAll(pointText, levelText, reloadButton, nextLvlButton, quitButton);
+		panel.getChildren().addAll(scoreText, levelText, moveNumText, reloadButton, nextLvlButton, quitButton);
 	}
 
 	public void attach(Group parent) {
@@ -66,33 +71,45 @@ public class InfoPanel {
 		reloadButton.setMinHeight(height);
 		reloadButton.setMinWidth(height);
 		reloadButton.setStyle(reloadButtonStyle);
-		reloadButton.setTranslateX(position.getX() + width - 2*insideMargin - 4*height);
+		reloadButton.setTranslateX(position.getX() + width - 4*insideMargin - 4*height);
 		reloadButton.setTranslateY(position.getY() + height/2 - height/2);
 		
 		nextLvlButton = new Button("Next level");
 		nextLvlButton.setMinHeight(height);
 		nextLvlButton.setMinWidth(height);
 		nextLvlButton.setStyle(nextLvlButtonStyle);
-		nextLvlButton.setTranslateX(position.getX() + width - insideMargin - 3*height);
+		nextLvlButton.setTranslateX(position.getX() + width - 2*insideMargin - 3*height);
 		nextLvlButton.setTranslateY(position.getY() + height/2 - height/2);
 		
 		quitButton = new Button("Quit");
 		quitButton.setMinHeight(height);
 		quitButton.setMinWidth(height);
 		quitButton.setStyle(quitButtonStyle);
-		quitButton.setTranslateX(position.getX() + width - insideMargin - 3*height);
+		quitButton.setTranslateX(position.getX() + width - 2*insideMargin - 3*height);
 		quitButton.setTranslateY(position.getY() + height/2 - height/2);
 		quitButton.setVisible(false);
 	}
 
-	public void addPlayerPoints(int points) {
-		playerPoints += points;
-		pointText.setText(generatePointText());
+	public void addPlayerScore() {
+		playerScore += moveNum;
+		resetMoveNum();
+		moveNumText.setText(generateMoveNumText());
+		scoreText.setText(generateScoreText());
 	}
 
 	public void setCurrentLevel(int level) {
 		currentLevel = level;
 		levelText.setText(generateLevelText());
+	}
+
+	public void addMoveNum() {
+		moveNum++;
+		moveNumText.setText(generateMoveNumText());
+	}
+
+	public void resetMoveNum() {
+		moveNum = 0;
+		moveNumText.setText(generateMoveNumText());
 	}
 
 	public void reloadBtnOnOff() {
@@ -109,16 +126,20 @@ public class InfoPanel {
 		quitButton.setVisible(!quitButton.isVisible());
 	}
 
-	private String generatePointText() {
-		return "Your points: " + playerPoints;
+	private String generateScoreText() {
+		return "Score: " + playerScore;
 	}
 
 	private String generateLevelText() {
-		return "Level " + currentLevel + " / " + levelsNum;
+		return "Level: " + currentLevel + " / " + levelsNum;
+	}
+
+	private String generateMoveNumText() {
+		return "Moves: " + moveNum;
 	}
 
 	private void setFontStyle(Text txt) {
-		txt.setFont(Font.font(insideMargin*2));
+		txt.setFont(Font.font(insideMargin*4));
 		txt.setFill(Colors.BLACK.getColor());
 		txt.setTextOrigin(VPos.TOP);
 	}

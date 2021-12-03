@@ -12,21 +12,22 @@ import javafx.scene.input.MouseEvent;
 
 public class GameBoard {
 
+	final int levelsNum;
+	final int rowNum;
+	final int colNum;
 	private int[][][] levelsData;
 	private Square[][] board;
 	final int squareSize;
-	final int rowNum;
-	final int colNum;
-	final int levelsNum;
 	final Direction gravityDirection;
+
 	private Canvas canvas;
 	private GraphicsContext gc;
+	Triangle triangle;
 
 	private boolean animationOn = false;
 	private static final int animationDuration = 8;
 	private int currentFrame = 0;
-
-	Triangle triangle;
+	private boolean isValidClickHappened = false;
 
 	GameBoard(int colNum, int rowNum, int squareSize, Canvas canvas, int levelsNum) {
 		board = new Square[rowNum][colNum];
@@ -83,6 +84,11 @@ public class GameBoard {
 		triangle.drawTo(gc);
 	}
 
+	private void clearCanvas() {
+		gc.setFill(Colors.WHITE.getColor());
+		gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+	}
+
 	private void addMouseEvents() {
 		canvas.addEventHandler(
 			MouseEvent.MOUSE_CLICKED,
@@ -102,8 +108,10 @@ public class GameBoard {
 						}
 						triangle.reset();
 					}
-					if (square.getMoveDirection() != Direction.NOMOVE)
+					if (square.getMoveDirection() != Direction.NOMOVE) {
 						animationOn = true;
+						isValidClickHappened = true;
+					}
 				}
 			}
 		);
@@ -145,11 +153,6 @@ public class GameBoard {
 			return getSquare(squareX, squareY);
 		
 		return null;
-	}
-
-	private void clearCanvas() {
-		gc.setFill(Colors.WHITE.getColor());
-		gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
 	}
 
 	public Square getSquare(int col, int row) {
@@ -352,6 +355,14 @@ public class GameBoard {
 		return counter;
 	}
 
+	public boolean isValidClickHappened() {
+		if (isValidClickHappened) {
+			isValidClickHappened = false;
+			return true;
+		}
+		return false;
+	}
+
 	private void readLevelFile() {
 		try {
 			String pathToLevelsFile = new File("src\\main\\java\\org\\openjfx\\vexed\\boards.txt")
@@ -373,22 +384,22 @@ public class GameBoard {
 
 			for (level = 0; level < levelsNum; ++level) {
 				for (int charNum = 0; charNum < 14; charNum++) {
-					i = levelsDataReader.read();
+					levelsDataReader.read();
 				}
 				for (row = 0; row < rowNum; ++row) {
 					for (col = 0; col < colNum; ++col) {
 						i = levelsDataReader.read();
 						levelsData[level][row][col] = i - 48;
 
-						i = levelsDataReader.read(); // read space
+						levelsDataReader.read(); // read space
 					}
-					i = levelsDataReader.read(); // read char '\n'
+					levelsDataReader.read(); // read char '\n'
 				}
 			}
 
 			levelsDataReader.close();
 		} catch (FileNotFoundException e) {
-			System.out.println("There is no file with name 'leveldata_test.txt'!");
+			System.out.println("There is no file with name 'boards.txt'!");
 		} catch (IOException e) {
 			System.out.println("Exception readLevelFile():\n" + e.getMessage());
 		} catch (Exception e) {
