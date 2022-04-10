@@ -1,7 +1,6 @@
 package org.openjfx.vexed;
 
 import java.io.*;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import javafx.event.EventHandler;
@@ -365,45 +364,37 @@ public class GameBoard {
 
 	private void readLevelFile() {
 		try {
-			String pathToLevelsFile = new File("src\\main\\java\\org\\openjfx\\vexed\\boards.txt")
-					.getAbsolutePath();
-			FileInputStream levelsDataReader = new FileInputStream(pathToLevelsFile);
-
-			int i;
-			byte lineCounter = 0;
-
-			// read header
-			while (lineCounter < 5) {
-				i = levelsDataReader.read();
-				if (i == '\n') {
+			ClassLoader classLoader = getClass().getClassLoader();
+			InputStream inputStream = classLoader.getResourceAsStream("boards.txt");
+			
+			try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
+				int i = 0;
+				int lineCounter = 0;
+				
+				// read header
+				while (lineCounter < 5) {
+					br.readLine();
 					++lineCounter;
 				}
-			}
-
-			int level = 0, row = 0, col = 0;
-
-			for (level = 0; level < levelsNum; ++level) {
-				for (int charNum = 0; charNum < 14; charNum++) {
-					levelsDataReader.read();
-				}
-				for (row = 0; row < rowNum; ++row) {
-					for (col = 0; col < colNum; ++col) {
-						i = levelsDataReader.read();
-						levelsData[level][row][col] = i - 48;
-
-						levelsDataReader.read(); // read space
+				
+				for (int level = 0; level < levelsNum; ++level) {
+					br.readLine(); // read level header
+					for (int row = 0; row < rowNum; ++row) {
+						for (int col = 0; col < colNum; ++col) {
+							i = br.read()-48;
+							levelsData[level][row][col] = i;
+							br.read(); // read space
+						}
+						br.read(); // read char new line
 					}
-					levelsDataReader.read(); // read char '\n'
 				}
-			}
-
-			levelsDataReader.close();
-		} catch (FileNotFoundException e) {
-			System.out.println("There is no file with name 'boards.txt'!");
-		} catch (IOException e) {
-			System.out.println("Exception readLevelFile():\n" + e.getMessage());
+			} catch (IOException e) {
+				System.out.println("Exception readLevelFile():\n" + e.getMessage());
+			};
+			
+			
 		} catch (Exception e) {
-			System.out.println("Exception: " + e.getMessage());
+			System.out.println("Exception readLevelFile(): " + e.getMessage());
 		}
 	}
 }
